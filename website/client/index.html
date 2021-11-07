@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>monitor server</title>
+</head>
+<body>
+  <div id="app">
+    <el-container>
+      <el-header>Header</el-header>
+      <el-main>
+        <p>Counter: {{ counter }}</p>
+        <el-button type="primary" @click="add">+</el-button>
+        <el-image :src="src"></el-image>
+      </el-main>
+      <el-footer>Footer</el-footer>
+    </el-container>
+  </div>
+  <link rel="stylesheet" href="../css/index.css">
+  <script src="../js/vue.global.js"></script>
+  <script src="../js/index.full.js"></script>
+  <script src="./js/monitor.umd.js"></script>
+  <script>
+    const Counter = {
+      setup() {
+        const counter = Vue.ref(0);
+        const src = Vue.ref('./img/cat.jpg');
+        return {
+          counter,
+          src
+        }
+      },
+      methods: {
+        add() {
+          this.counter++;
+        }
+      },
+    }
+    Vue.createApp(Counter).use(ElementPlus).mount('#app');
+  </script>
+</body>
+</html>
