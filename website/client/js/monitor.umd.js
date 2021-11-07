@@ -146,16 +146,18 @@
     let o = {
       initiatorType: timing.initiatorType,
       name: timing.name,
+      // 连接过程
       duration: parseInt(timing.duration),
       redirect: filterTime(timing.redirectEnd, timing.redirectStart), // 重定向
       dns: filterTime(timing.domainLookupEnd, timing.domainLookupStart), // DNS解析
       connect: filterTime(timing.connectEnd, timing.connectStart), // TCP建连
       network: filterTime(timing.connectEnd, timing.startTime), // 网络总耗时
-
+      // 接受过程
       send: filterTime(timing.responseStart, timing.requestStart), // 发送开始到接受第一个返回
       receive: filterTime(timing.responseEnd, timing.responseStart), // 接收总时间
       request: filterTime(timing.responseEnd, timing.requestStart), // 总时间
 
+      // 核心指标
       ttfb: filterTime(timing.responseStart, timing.requestStart), // 首字节时间
     };
 
@@ -172,6 +174,7 @@
       }
 
       if (window.PerformanceObserver) {
+        // 动态获得每一个资源信息
         let observer = new window.PerformanceObserver((list) => {
           try {
             let entries = list.getEntries();
@@ -184,6 +187,7 @@
           entryTypes: ['resource']
         });
       } else {
+        // 在onload之后获取所有的资源新
         onload(() => {
           let entries = performance.getEntriesByType('resource');
           cb(resolveEntries(entries));
