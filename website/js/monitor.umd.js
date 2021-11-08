@@ -197,6 +197,7 @@
   };
 
   let xhrHook = {
+    // TODO 自身sdk的请求无需拦截
     init: (cb) => {
       // xhr hook
       let xhr = window.XMLHttpRequest;
@@ -385,6 +386,58 @@
     },
   };
 
+  // /html/body/div[2]/ul/li[2]
+
+  let getXpath = (element) => {
+    if (!(element instanceof Element)) {
+      return void 0;
+    }
+
+    if (element.nodeType !== 1) {
+      return void 0;
+    }
+
+    let rootElement = document.body;
+    if (element === rootElement) {
+      return void 0;
+    }
+
+
+    let childIndex = (ele) => {
+      let parent = ele.parentNode;
+      let children = [].slice.call(parent.childNodes).filter(_ => _.nodeType === 1);
+      let i = 0;
+      for (let _i = 0, len = children.length; _i < len; _i++) {
+        if (children[_i] === ele) {
+          i = _i;
+          break;
+        }
+      }
+      return i === 0 ? '' : '[' + i + ']';
+    };
+
+    let xpath = '';
+
+    while (element !== document) {
+      let tag = element.tagName.toLocaleLowerCase();
+      let eleIndex = childIndex(element);
+      xpath = '/' + tag + eleIndex + xpath;
+      element = element.parentNode;
+    }
+
+    return xpath;
+  };
+
+  var behavior = {
+    init: (cb) => {
+      cb();
+      document.addEventListener('click', (e) => {
+        let xpath = getXpath(e.target);
+        console.log('xpath: ', xpath);
+      }, false);
+    }
+  };
+
   // 性能监控
   perf.init((perfData) => {
     console.log('perfData', perfData);
@@ -403,6 +456,11 @@
   // 错误监控
   errorCatch.init((errorData) => {
     console.log('errorData', errorData);
+  });
+
+  // 用户行为路径监控
+  behavior.init(() => {
+    console.log('behavior init');
   });
 
 }));

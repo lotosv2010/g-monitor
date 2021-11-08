@@ -2,6 +2,7 @@ import perf from './perf';
 import resources from './resources';
 import xhr from './xhr';
 import errorCatch from './error-catch';
+import behavior from './behavior';
 
 // 性能监控
 perf.init((perfData) => {
@@ -21,4 +22,9 @@ xhr.init((xhrData) => {
 // 错误监控
 errorCatch.init((errorData) => {
   console.log('errorData', errorData)
+});
+
+// 用户行为路径监控
+behavior.init(() => {
+  console.log('behavior init')
 });

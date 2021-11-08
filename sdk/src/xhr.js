@@ -1,4 +1,5 @@
 let xhrHook = {
+  // TODO 自身sdk的请求无需拦截
   init: (cb) => {
     // xhr hook
     let xhr = window.XMLHttpRequest;

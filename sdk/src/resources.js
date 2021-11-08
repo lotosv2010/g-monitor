@@ -1,4 +1,4 @@
-import {onload} from './util.js';
+import {onload} from './util/onload';
 
 // 过滤无效数据
 function filterTime(a, b) {

@@ -16,7 +16,7 @@ const babelConfig = {
 export default {
   input: 'src/index.js',
   output: {
-    file: isDev ? '../website/client/js/monitor.umd.js' : './dist/monitor.umd.js',
+    file: isDev ? '../website/js/monitor.umd.js' : './dist/monitor.umd.js',
     name: 'Monitor',
     format: 'umd',
     sourcemap: true
