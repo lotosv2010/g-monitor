@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>monitor server</title>
+  <script src="./js/monitor.umd.js"></script>
+</head>
+<body>
+  <div class="react-area"></div>
+  <div id="app">
+    <el-container>
+      <el-header>Header</el-header>
+      <el-main>
+        <p>Counter: {{ counter }}</p>
+        <el-button type="primary" @click="add">+</el-button>
+        <el-image :src="src"></el-image>
+      </el-main>
+      <el-footer>Footer</el-footer>
+    </el-container>
+  </div>
+  <link rel="stylesheet" href="../css/index.css">
+  <script src="../js/vue.global.js"></script>
+  <script src="../js/index.full.js"></script>
+  <script src="./js/axios.js"></script>
+  <script>
+    const Counter = {
+      setup() {
+        const counter = Vue.ref(0);
+        const src = Vue.ref('./img/cat.jpg');
+        // mounted
+        Vue.onMounted(async() => {
+          const list = await axios.get('/api/list');
+          // console.log(list);
+          const detail = await fetch('/api/detail');
+          console.log(await detail.json());
+          new Promise((resolve, reject) => {
+            return reject('new Promise reject');
+          })
+          Promise.reject('Promise.reject');
+        })
+        return {
+          counter,
+          src
+        }
+      },
+      methods: {
+        add() {
+          this.counter++;
+        }
+      },
+    }
+    Vue.createApp(Counter).use(ElementPlus).mount('#app');
+    // const v = {};
+    // v = []
+  </script>
+  <script src="../js/vendor.bundle.js"></script>
+  <script src="../js/main.bundle.js"></script>
+  <!-- <script src="../js/mdp.js"></script> -->
+</body>
+</html>
