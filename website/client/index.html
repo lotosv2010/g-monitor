@@ -22,11 +22,19 @@
   <link rel="stylesheet" href="../css/index.css">
   <script src="../js/vue.global.js"></script>
   <script src="../js/index.full.js"></script>
+  <script src="./js/axios.js"></script>
   <script>
     const Counter = {
       setup() {
         const counter = Vue.ref(0);
         const src = Vue.ref('./img/cat.jpg');
+        // mounted
+        Vue.onMounted(async() => {
+          const list = await axios.get('/api/list');
+          // console.log(list);
+          const detail = await fetch('/api/detail');
+          console.log(await detail.json());
+        })
         return {
           counter,
           src

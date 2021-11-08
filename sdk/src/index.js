@@ -1,5 +1,6 @@
 import perf from './perf';
-import resources from './resources'
+import resources from './resources';
+import xhr from './xhr';
 
 // 性能监控
 perf.init((perfData) => {
@@ -10,3 +11,8 @@ perf.init((perfData) => {
 resources.init((resourcesData) => {
   console.log('resourcesData', resourcesData)
 });
+
+// 接口性能监控
+xhr.init((xhrData) => {
+  console.log('xhrData', xhrData)
+})
