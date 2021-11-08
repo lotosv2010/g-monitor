@@ -8,6 +8,7 @@
   <script src="./js/monitor.umd.js"></script>
 </head>
 <body>
+  <div class="react-area"></div>
   <div id="app">
     <el-container>
       <el-header>Header</el-header>
@@ -34,6 +35,10 @@
           // console.log(list);
           const detail = await fetch('/api/detail');
           console.log(await detail.json());
+          new Promise((resolve, reject) => {
+            return reject('new Promise reject');
+          })
+          Promise.reject('Promise.reject');
         })
         return {
           counter,
@@ -47,6 +52,10 @@
       },
     }
     Vue.createApp(Counter).use(ElementPlus).mount('#app');
+    // const v = {};
+    // v = []
   </script>
+  <script src="../js/vendor.bundle.js"></script>
+  <script src="../js/main.bundle.js"></script>
 </body>
 </html>
