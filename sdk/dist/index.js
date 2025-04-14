@@ -86,7 +86,7 @@ function getLastEvent() {
     return lastEvent;
 }
 
-var getSelector = function (path) {
+var getSelector$1 = function (path) {
     return path.reverse().filter(function (element) {
         return element !== window && element !== document;
     }).map(function (element) {
@@ -100,10 +100,10 @@ var getSelector = function (path) {
         return selector;
     }).join('-->');
 };
-function getSelector$1 (event) {
+function getSelector$2 (event) {
     var paths = event.path || (event.composedPath && event.composedPath());
     if (Array.isArray(paths) && paths.length) {
-        return getSelector(paths);
+        return getSelector$1(paths);
     }
     else {
         var res = [];
@@ -112,7 +112,7 @@ function getSelector$1 (event) {
             res.push(element);
             element = element.parentNode;
         }
-        return getSelector(res);
+        return getSelector$1(res);
     }
 }
 
@@ -179,7 +179,7 @@ var JSError = /** @class */ (function () {
                     filename: target.src || target.href,
                     tagName: target.tagName,
                     timeStamp: e.timeStamp,
-                    selector: getSelector$1(e), //选择器
+                    selector: getSelector$2(e), //选择器
                 };
                 _this.storage.setItem(error_1);
                 tracker.send(error_1);
@@ -196,7 +196,7 @@ var JSError = /** @class */ (function () {
                 filename: e.filename,
                 position: "".concat(e.lineno, ":").concat(e.colno),
                 stack: _this.formatStack(e.error.stack),
-                selector: lastEvent ? getSelector$1(lastEvent) : ''
+                selector: lastEvent ? getSelector$2(lastEvent) : ''
             };
             // 存储到本地，测试用
             _this.storage.setItem(error);
@@ -237,7 +237,7 @@ var JSError = /** @class */ (function () {
                 filename: filename,
                 position: "".concat(lineno, ":").concat(colno),
                 stack: stack,
-                selector: lastEvent ? getSelector$1(lastEvent) : ''
+                selector: lastEvent ? getSelector$2(lastEvent) : ''
             };
             _this.storage.setItem(error);
             tracker.send(error);
@@ -300,6 +300,66 @@ var XHR = /** @class */ (function () {
     return XHR;
 }());
 
+function onload (callback) {
+    if (document.readyState === 'complete') {
+        callback();
+    }
+    else {
+        window.addEventListener('load', callback);
+    }
+}
+
+var getSelector = function (element) {
+    var selector = element.nodeName.toLowerCase();
+    if (element.id) {
+        selector = "#".concat(element.id);
+    }
+    else if (element.className && typeof element.className === 'string') {
+        selector = '.' + element.className.split(' ').filter(function (item) { return !!item; }).join('.');
+    }
+    return selector;
+};
+var Blank = /** @class */ (function () {
+    function Blank() {
+        this.init();
+    }
+    Blank.prototype.init = function () {
+        var wrapperSelectors = ['body', 'html', '#container', '.content', '.root'];
+        var emptyPoints = 0;
+        function isWrapper(element) {
+            var selector = getSelector(element);
+            if (wrapperSelectors.indexOf(selector) >= 0) {
+                emptyPoints++;
+            }
+        }
+        onload(function () {
+            var xElements, yElements;
+            for (var i = 1; i <= 9; i++) {
+                // 获取当前页面的元素
+                xElements = document.elementsFromPoint(window.innerWidth * i / 10, window.innerHeight / 2);
+                yElements = document.elementsFromPoint(window.innerWidth / 2, window.innerHeight * i / 10);
+                isWrapper(xElements[0]);
+                isWrapper(yElements[0]);
+            }
+            if (emptyPoints >= 16) {
+                var centerElements = document.elementsFromPoint(window.innerWidth / 2, window.innerHeight / 2);
+                var data = {
+                    kind: 'stability',
+                    type: 'blank',
+                    emptyPoints: emptyPoints,
+                    screen: window.screen.width + "x" + window.screen.height,
+                    viewPoint: window.innerWidth + 'x' + window.innerHeight,
+                    selector: getSelector(centerElements[0]),
+                };
+                Blank.storage.setItem(data);
+                tracker.send(data);
+            }
+        });
+    };
+    Blank.storage = Storage.getInstance();
+    return Blank;
+}());
+
 var GMonitor = /** @class */ (function () {
     function GMonitor() {
         this.init();
@@ -308,6 +368,7 @@ var GMonitor = /** @class */ (function () {
         try {
             new JSError();
             new XHR();
+            new Blank();
         }
         catch (error) {
             console.error('GMonitor initialization failed:', error);

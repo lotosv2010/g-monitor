@@ -76,7 +76,7 @@ function App() {
 
   return (
     <Layout className="app" style={{ minHeight: '100vh', background: token.colorBgContainer }}>
-      <Content style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
+      <Content style={{ padding: '0 24px', maxWidth: '1200px', margin: '0 auto' }}>
         <Card 
           title="监控测试控制台"
           variant="outlined"
@@ -175,11 +175,16 @@ function App() {
                         <Tag color={
                           item.type === 'js-error' ? 'red' :
                           item.type === 'promise-error' ? 'orange' :
-                          item.type === 'xhr' ? 'green' : 'blue'
+                          item.type === 'xhr' ? 'green' : 
+                          item.type === 'blank' ? 'purple' : 'pink'
                         }>
-                          {item.timestamp || item.duration}
+                          {item.timestamp || item.duration || item.emptyPoints}
                         </Tag>
-                        <Text style={{ color: token.colorText }}>{item.message || item.status + item.statusText}</Text>
+                        <Text style={{ color: token.colorText }}>{
+                          item.message 
+                          || item.status + item.statusText
+                          || `screen:${item.screen},viewPoint: ${item.viewPoint}`
+                        }</Text>
                       </Space>
                     </List.Item>
                   )}

@@ -1,5 +1,6 @@
 import JSError from './error/index';
 import XHR from './xhr';
+import Blank from './blank';
 import { IBasicType, BasicType } from './types/index'
 
 class GMonitor {
@@ -10,8 +11,9 @@ class GMonitor {
 
   private init() {
     try {
-      new JSError()
-      new XHR()
+      new JSError();
+      new XHR();
+      new Blank();
     } catch (error) {
       console.error('GMonitor initialization failed:', error);
     }
