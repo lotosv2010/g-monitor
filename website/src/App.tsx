@@ -8,12 +8,15 @@ import {
   UserOutlined, 
   DeleteOutlined 
 } from '@ant-design/icons';
+import axios from 'axios';
 import './App.css';
 import GMonitor, { BasicType } from '../../sdk/dist/index';
 
 const { Content } = Layout;
 const { Text } = Typography;
 const { useToken } = theme;
+
+const GM = new GMonitor();
 
 function App() {
   const { token } = useToken();
@@ -33,11 +36,12 @@ function App() {
     });
   }
 
-  const triggerResourceLoad = () => {
-    const img = new Image();
-    img.src = 'https://via.placeholder.com/150';
-    // img.onload = () => logMessage('图片资源加载完成', 'success');
-    // img.onerror = () => logMessage('CDN资源加载失败', 'error');
+  const triggerLoadSuccess = () => {
+    axios.get('http://jsonplaceholder.typicode.com/todos/1').then(data => console.log(data))
+  };
+
+  const triggerLoadFail = () => {
+    axios.get('http://jsonplaceholder.typicode.com/todos1').then(data => console.log(data))
   };
 
   const clear = () => {
@@ -47,7 +51,6 @@ function App() {
 
   // 自动滚动到底部
   useEffect(() => {
-    const GM = new GMonitor();
     setGM(GM);
     const terminal = document.getElementById('terminal');
     if (terminal) {
@@ -102,9 +105,16 @@ function App() {
               <Button
                 type="primary"
                 icon={<CloudDownloadOutlined />}
-                onClick={triggerResourceLoad}
+                onClick={triggerLoadSuccess}
               >
-                资源加载
+                触发接口成功
+              </Button>
+              <Button
+                type="primary"
+                icon={<CloudDownloadOutlined />}
+                onClick={triggerLoadFail}
+              >
+                触发接口失败
               </Button>
               <Button
                 type="dashed"
@@ -153,7 +163,7 @@ function App() {
               <div id="terminal" style={{ height: '400px', overflowY: 'auto' }}>
                 <List
                   dataSource={logs}
-                  renderItem={(item) => (
+                  renderItem={(item: any) => (
                     <List.Item
                       style={{ 
                         padding: '8px 16px',
@@ -165,11 +175,11 @@ function App() {
                         <Tag color={
                           item.type === 'js-error' ? 'red' :
                           item.type === 'promise-error' ? 'orange' :
-                          item.type === 'success' ? 'green' : 'blue'
+                          item.type === 'xhr' ? 'green' : 'blue'
                         }>
-                          {item.timestamp}
+                          {item.timestamp || item.duration}
                         </Tag>
-                        <Text style={{ color: token.colorText }}>{item.message}</Text>
+                        <Text style={{ color: token.colorText }}>{item.message || item.status + item.statusText}</Text>
                       </Space>
                     </List.Item>
                   )}

@@ -17,7 +17,22 @@ class JSError {
   }
   private init() {
     window.addEventListener('error', (e) => {
+      console.log(e);
       const lastEvent: any = getLastEvent();
+      const target: any = e.target;
+      if (target && (target.src || target.href)) {
+        const error: any = {
+          kind: 'stability',//稳定性指标
+          type: 'resource-error',//resource
+          errorType: e.type,
+          filename: target.src || target.href,//加载失败的资源
+          tagName: target.tagName,//标签名
+          timeStamp: e.timeStamp,//时间
+          selector: getSelector(e),//选择器
+        }
+        this.storage.setItem(error);
+        tracker.send(error);
+    } 
       const error: BasicType = {
         title: document.title,
         url: window.location.href,

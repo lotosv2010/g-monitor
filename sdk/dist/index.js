@@ -168,7 +168,22 @@ var JSError = /** @class */ (function () {
     JSError.prototype.init = function () {
         var _this = this;
         window.addEventListener('error', function (e) {
+            console.log(e);
             var lastEvent = getLastEvent();
+            var target = e.target;
+            if (target && (target.src || target.href)) {
+                var error_1 = {
+                    kind: 'stability',
+                    type: 'resource-error',
+                    errorType: e.type,
+                    filename: target.src || target.href,
+                    tagName: target.tagName,
+                    timeStamp: e.timeStamp,
+                    selector: getSelector$1(e), //选择器
+                };
+                _this.storage.setItem(error_1);
+                tracker.send(error_1);
+            }
             var error = {
                 title: document.title,
                 url: window.location.href,
@@ -231,6 +246,60 @@ var JSError = /** @class */ (function () {
     return JSError;
 }());
 
+var XHR = /** @class */ (function () {
+    function XHR() {
+        this.init();
+    }
+    XHR.prototype.init = function () {
+        var XMLHttpRequest = window.XMLHttpRequest;
+        var oldOpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function (method, url, async, username, password) {
+            if (!url.match(/logstores/) && !url.match(/sockjs/)) {
+                this.logData = {
+                    method: method,
+                    url: url,
+                    async: async,
+                    username: username,
+                    password: password,
+                };
+            }
+            return oldOpen.call(this, method, url, async, username, password);
+        };
+        var oldSend = XMLHttpRequest.prototype.send;
+        var start;
+        XMLHttpRequest.prototype.send = function (body) {
+            var _this = this;
+            if (this.logData) {
+                start = Date.now();
+                var handler = function (type) { return function (event) {
+                    var duration = Date.now() - start;
+                    var status = _this.status;
+                    var statusText = _this.statusText;
+                    var data = {
+                        kind: "stability",
+                        type: "xhr",
+                        eventType: type,
+                        pathname: _this.logData.url,
+                        status: status,
+                        statusText: statusText,
+                        duration: "" + duration,
+                        response: _this.response ? JSON.stringify(_this.response) : "",
+                        params: body || "",
+                    };
+                    XHR.storage.setItem(data);
+                    tracker.send(data);
+                }; };
+                this.addEventListener("load", handler("load"), false);
+                this.addEventListener("error", handler("error"), false);
+                this.addEventListener("abort", handler("abort"), false);
+            }
+            oldSend.call(this, body);
+        };
+    };
+    XHR.storage = Storage.getInstance();
+    return XHR;
+}());
+
 var GMonitor = /** @class */ (function () {
     function GMonitor() {
         this.init();
@@ -238,6 +307,7 @@ var GMonitor = /** @class */ (function () {
     GMonitor.prototype.init = function () {
         try {
             new JSError();
+            new XHR();
         }
         catch (error) {
             console.error('GMonitor initialization failed:', error);
