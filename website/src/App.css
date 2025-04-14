@@ -1,4 +1,116 @@
+.output .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.output button {
+  background: linear-gradient(to bottom, #e9ecef, #dee2e6);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #212529;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.output button:hover {
+  background: #ced4da;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
 .app {
-  color: azure;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px;
+  background-color: #f8f9fa;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.05);
+}
+
+.test-interface {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  overflow: hidden;
+}
+
+.controls {
+  width: 30%;
+  padding: 25px;
+  border-right: 1px solid #e9ecef;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.output {
+  width: 70%;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+}
+
+.terminal {
+  background-color: #1a1d23;
+  color: #28a745;
+  padding: 25px;
+  height: 100%;
+  overflow-y: auto;
+  font-family: 'Microsoft YaHei', sans-serif;
+  font-size: 15px;
+  line-height: 1.8;
+  border-radius: 12px;
+  box-shadow: inset 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.terminal::-webkit-scrollbar {
+  width: 12px;
+}
+
+.terminal::-webkit-scrollbar-track {
+  background: #21252b;
+  border-radius: 8px;
+}
+
+.terminal::-webkit-scrollbar-thumb {
+  background: #343a40;
+  border-radius: 8px;
+  border: 3px solid #1a1d23;
+}
+
+.terminal::-webkit-scrollbar-thumb:hover {
+  background: #495057;
+}
+
+/* 优化滚动条样式 */
+#terminal::-webkit-scrollbar {
+  width: 6px;
+}
+
+#terminal::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+#terminal::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+/* 暗色模式适配 */
+[data-theme='dark'] #terminal::-webkit-scrollbar-track {
+  background: #333;
+}
+
+[data-theme='dark'] #terminal::-webkit-scrollbar-thumb {
+  background: #666;
 }

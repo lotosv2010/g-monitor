@@ -1,99 +1,250 @@
-var GPerformance = /** @class */ (function () {
-    function GPerformance() {
-        this.performance = window.performance;
-        // this.init();
-        this.init();
-    }
-    GPerformance.prototype.init = function () {
-        var _this = this;
-        if (!this.performance)
-            return;
-        // Move getNavigationTiming inside the load event listener to ensure loadEventEnd is captured correctly
-        window.addEventListener("load", function () {
-            // Delay the execution slightly to ensure loadEventEnd is captured
-            setTimeout(function () {
-                _this.getNavigationTiming();
-            }, 0);
-        });
-        this.getResourceTiming();
-        this.getPaintTiming();
-        this.getLCP();
+import SlsTracker from '@aliyun-sls/web-track-browser';
+
+/******************************************************************************
+Copyright (c) Microsoft Corporation.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */
+
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
     };
-    // 新版性能指标获取方式
-    GPerformance.prototype.getNavigationTiming = function () {
-        var navigationEntry = this.performance.getEntriesByType("navigation")[0];
-        if (navigationEntry) {
-            var metrics = {
-                // 关键时间节点
-                startTime: navigationEntry.startTime,
-                redirectStart: navigationEntry.redirectStart,
-                redirectEnd: navigationEntry.redirectEnd,
-                domainLookupStart: navigationEntry.domainLookupStart,
-                domainLookupEnd: navigationEntry.domainLookupEnd,
-                connectStart: navigationEntry.connectStart,
-                connectEnd: navigationEntry.connectEnd,
-                secureConnectionStart: navigationEntry.secureConnectionStart,
-                requestStart: navigationEntry.requestStart,
-                responseStart: navigationEntry.responseStart,
-                responseEnd: navigationEntry.responseEnd,
-                domInteractive: navigationEntry.domInteractive,
-                domContentLoadedEventStart: navigationEntry.domContentLoadedEventStart,
-                domContentLoadedEventEnd: navigationEntry.domContentLoadedEventEnd,
-                domComplete: navigationEntry.domComplete,
-                loadEventStart: navigationEntry.loadEventStart,
-                loadEventEnd: navigationEntry.loadEventEnd,
-                // 计算关键指标
-                dnsTime: navigationEntry.domainLookupEnd - navigationEntry.domainLookupStart,
-                tcpTime: navigationEntry.connectEnd - navigationEntry.connectStart,
-                ttfb: navigationEntry.responseStart - navigationEntry.requestStart,
-                fullLoadTime: navigationEntry.loadEventEnd - navigationEntry.startTime,
-                domReadyTime: navigationEntry.domContentLoadedEventEnd - navigationEntry.startTime,
-            };
-            console.log("Navigation Timing:", metrics);
-            return metrics;
+    return __assign.apply(this, arguments);
+};
+
+function __spreadArray(to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+}
+
+typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
+    var e = new Error(message);
+    return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+};
+
+var Storage = /** @class */ (function () {
+    function Storage(key) {
+        if (key === void 0) { key = 'g-monitor-error'; }
+        this.key = '';
+        // 初始化
+        this.key = key;
+    }
+    Storage.getInstance = function () {
+        if (!this.instance) {
+            this.instance = new Storage();
+        }
+        return this.instance;
+    };
+    Storage.prototype.setItem = function (value) {
+        var prev = localStorage.getItem(this.key);
+        if (prev) {
+            var prevData = JSON.parse(prev);
+            localStorage.setItem(this.key, JSON.stringify(__spreadArray(__spreadArray([], prevData, true), [value], false)));
+        }
+        else {
+            localStorage.setItem(this.key, JSON.stringify([value]));
         }
     };
-    // 资源加载性能
-    GPerformance.prototype.getResourceTiming = function () {
-        var resources = this.performance.getEntriesByType("resource");
-        var resourceMetrics = resources.map(function (resource) { return ({
-            name: resource.name,
-            duration: resource.duration,
-            initiatorType: resource.initiatorType,
-            transferSize: resource.transferSize,
-            encodedBodySize: resource.encodedBodySize,
-            decodedBodySize: resource.decodedBodySize,
-            startTime: resource.startTime,
-            responseEnd: resource.responseEnd
-        }); });
-        console.log("Resource Timing:", resourceMetrics);
-        return resourceMetrics;
+    Storage.prototype.getItem = function () {
+        return localStorage.getItem(this.key);
     };
-    // 获取 Paint Timing (FP/FCP) using PerformanceObserver
-    GPerformance.prototype.getPaintTiming = function () {
-        var paintObserver = new PerformanceObserver(function (list) {
-            var entries = list.getEntries();
-            var firstPaint = entries.find(function (e) { return e.name === "first-paint"; });
-            var firstContentfulPaint = entries.find(function (e) { return e.name === "first-contentful-paint"; });
-            var result = {
-                firstPaint: firstPaint === null || firstPaint === void 0 ? void 0 : firstPaint.startTime,
-                firstContentfulPaint: firstContentfulPaint === null || firstContentfulPaint === void 0 ? void 0 : firstContentfulPaint.startTime
-            };
-            console.log("Paint Timing:", result);
-        });
-        paintObserver.observe({ type: "paint", buffered: true });
+    Storage.prototype.remove = function () {
+        localStorage.removeItem(this.key);
     };
-    // 获取 LCP (Largest Contentful Paint) using PerformanceObserver
-    GPerformance.prototype.getLCP = function () {
-        var lcpObserver = new PerformanceObserver(function (list) {
-            var entries = list.getEntries();
-            var lastEntry = entries[entries.length - 1];
-            console.log('LCP:', lastEntry.renderTime || lastEntry.startTime);
-        });
-        lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
-    };
-    return GPerformance;
+    return Storage;
 }());
 
-export { GPerformance };
+var lastEvent = null;
+['click', 'touchstart', 'mousedown', 'mouseover', 'keydown'].map(function (event) {
+    document.addEventListener(event, function (e) {
+        lastEvent = e;
+    }, {
+        capture: true,
+        passive: true // 默认为false，表示事件处理函数可以阻止默认事件，如果设置为true，则表示事件处理函数不可以阻止默认事件
+    });
+});
+function getLastEvent() {
+    return lastEvent;
+}
+
+var getSelector = function (path) {
+    return path.reverse().filter(function (element) {
+        return element !== window && element !== document;
+    }).map(function (element) {
+        var selector = element.nodeName.toLowerCase();
+        if (element.id) {
+            selector += "#".concat(element.id);
+        }
+        else if (element.className && typeof element.className === 'string') {
+            selector += '.' + element.className.split(' ').filter(function (item) { return !!item; }).join('.');
+        }
+        return selector;
+    }).join('-->');
+};
+function getSelector$1 (event) {
+    var paths = event.path || (event.composedPath && event.composedPath());
+    if (Array.isArray(paths) && paths.length) {
+        return getSelector(paths);
+    }
+    else {
+        var res = [];
+        var element = event.target;
+        while (element) {
+            res.push(element);
+            element = element.parentNode;
+        }
+        return getSelector(res);
+    }
+}
+
+var host = "cn-hangzhou.log.aliyuncs.com";
+var project = "g-monitor";
+var logstore = "g-monitor-store";
+function getExtraData() {
+    return {
+        title: document.title,
+        url: location.href,
+        timestamp: Date.now(),
+        userAgent: navigator.userAgent,
+    };
+}
+var SendTracker = /** @class */ (function () {
+    function SendTracker() {
+        this.opts = {
+            host: host,
+            project: project,
+            logstore: logstore,
+            time: 10,
+            count: 10,
+            topic: 'topic',
+            source: 'source',
+            tags: {},
+        };
+        this.tracker = new SlsTracker(this.opts); // 创建SlsTracker对象
+    }
+    SendTracker.prototype.send = function (data, callback) {
+        if (data === void 0) { data = {}; }
+        var extraData = getExtraData();
+        var logs = __assign(__assign({}, extraData), data);
+        // console.log(logs);
+        // console.log(JSON.stringify(logs, null, 2));
+        this.tracker.send(logs);
+    };
+    return SendTracker;
+}());
+var tracker = new SendTracker();
+
+var JSError = /** @class */ (function () {
+    function JSError() {
+        this.storage = Storage.getInstance();
+        this.init();
+    }
+    JSError.prototype.formatStack = function (stack) {
+        if (stack === void 0) { stack = ''; }
+        // 将 stack 转换成一个数组
+        return stack.split('\n').slice(1).map(function (item) {
+            return item.replace(/^\s+at\s+/g, '');
+        });
+    };
+    JSError.prototype.init = function () {
+        var _this = this;
+        window.addEventListener('error', function (e) {
+            var lastEvent = getLastEvent();
+            var error = {
+                title: document.title,
+                url: window.location.href,
+                timestamp: "".concat(e.timeStamp),
+                userAgent: navigator.userAgent,
+                kind: 'stability',
+                type: 'js-error',
+                errorType: e.type,
+                message: e.message,
+                filename: e.filename,
+                position: "".concat(e.lineno, ":").concat(e.colno),
+                stack: _this.formatStack(e.error.stack),
+                selector: lastEvent ? getSelector$1(lastEvent) : ''
+            };
+            // 存储到本地，测试用
+            _this.storage.setItem(error);
+            tracker.send(error);
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+            var lastEvent = getLastEvent();
+            var message = '';
+            var stack = [];
+            var lineno = '';
+            var colno = '';
+            var filename = '';
+            var reason = e.reason;
+            if (typeof reason === 'string') {
+                message = reason;
+            }
+            else if (typeof reason === 'object') {
+                message = reason.message;
+                if (reason.stack) {
+                    var matchResult = reason.stack.match(/at\s+(.+):(\d+):(\d+)/);
+                    if (matchResult) {
+                        filename = matchResult[1];
+                        lineno = matchResult[2];
+                        colno = matchResult[3];
+                    }
+                    stack = _this.formatStack(reason.stack);
+                }
+            }
+            var error = {
+                title: document.title,
+                url: window.location.href,
+                timestamp: "".concat(e.timeStamp),
+                userAgent: navigator.userAgent,
+                kind: 'stability',
+                type: 'promise-error',
+                errorType: e.type,
+                message: message,
+                filename: filename,
+                position: "".concat(lineno, ":").concat(colno),
+                stack: stack,
+                selector: lastEvent ? getSelector$1(lastEvent) : ''
+            };
+            _this.storage.setItem(error);
+            tracker.send(error);
+        });
+    };
+    return JSError;
+}());
+
+var GMonitor = /** @class */ (function () {
+    function GMonitor() {
+        this.init();
+    }
+    GMonitor.prototype.init = function () {
+        try {
+            new JSError();
+        }
+        catch (error) {
+            console.error('GMonitor initialization failed:', error);
+        }
+    };
+    return GMonitor;
+}());
+
+export { GMonitor as default };
 //# sourceMappingURL=index.js.map
