@@ -11,6 +11,7 @@ import {
 import axios from 'axios';
 import './App.css';
 import GMonitor, { BasicType } from '../../sdk/dist/index';
+// import { onFCP, onTTFB, onCLS, onFID, onINP, onLCP } from 'web-vitals'
 
 const { Content } = Layout;
 const { Text } = Typography;
@@ -49,6 +50,14 @@ function App() {
     setLogs([]);
   };
 
+  // const test = () => {
+  //   onFCP(console.log);
+  //   onTTFB(console.log);
+  //   onCLS(console.log);
+  //   onFID(console.log);
+  //   onINP(console.log);
+  //   onLCP(console.log);
+  // }
   // 自动滚动到底部
   useEffect(() => {
     setGM(GM);
@@ -56,6 +65,7 @@ function App() {
     if (terminal) {
       terminal.scrollTop = terminal.scrollHeight;
     }
+    // test()
   }, []);
 
   useEffect(() => {
@@ -185,6 +195,8 @@ function App() {
                           item.message 
                           || item.status + item.statusText
                           || (item.loadTime ? `页面完全加载时间 ${item.loadTime} ms` : null)
+                          || (item.inputDelay ? `FID时间 ${item.inputDelay} ms` : null)
+                          || (item.FCP ? `FCP时间 ${item.FCP} ms` : null)
                           || `screen:${item.screen},viewPoint: ${item.viewPoint}`
                         }</Text>
                       </Space>
