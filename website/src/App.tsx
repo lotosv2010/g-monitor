@@ -176,13 +176,15 @@ function App() {
                           item.type === 'js-error' ? 'red' :
                           item.type === 'promise-error' ? 'orange' :
                           item.type === 'xhr' ? 'green' : 
-                          item.type === 'blank' ? 'purple' : 'pink'
+                          item.type === 'blank' ? 'purple' : 
+                          item.type === 'timing' ? 'pink' : 'cyan'
                         }>
-                          {item.timestamp || item.duration || item.emptyPoints}
+                          {item.timestamp || item.duration || item.emptyPoints || item.loadTime}
                         </Tag>
                         <Text style={{ color: token.colorText }}>{
                           item.message 
                           || item.status + item.statusText
+                          || (item.loadTime ? `页面完全加载时间 ${item.loadTime} ms` : null)
                           || `screen:${item.screen},viewPoint: ${item.viewPoint}`
                         }</Text>
                       </Space>

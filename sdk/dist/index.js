@@ -360,6 +360,36 @@ var Blank = /** @class */ (function () {
     return Blank;
 }());
 
+var Timing = /** @class */ (function () {
+    function Timing() {
+        this.init();
+    }
+    Timing.prototype.init = function () {
+        onload(function () {
+            setTimeout(function () {
+                var navigationEntry = window.performance.getEntriesByType('navigation')[0];
+                var _a = navigationEntry || {}, connectStart = _a.connectStart, connectEnd = _a.connectEnd, responseEnd = _a.responseEnd, responseStart = _a.responseStart, requestStart = _a.requestStart, loadEventEnd = _a.loadEventEnd, domComplete = _a.domComplete, domContentLoadedEventEnd = _a.domContentLoadedEventEnd, domContentLoadedEventStart = _a.domContentLoadedEventStart, domInteractive = _a.domInteractive, fetchStart = _a.fetchStart;
+                var data = {
+                    kind: 'experience',
+                    type: 'timing',
+                    connectTime: connectEnd - connectStart,
+                    ttfbTime: responseStart - requestStart,
+                    responseTime: responseEnd - responseStart,
+                    parseDomTime: loadEventEnd - domInteractive,
+                    domContentLoadedTime: domContentLoadedEventEnd - domContentLoadedEventStart,
+                    timeToInteractive: domInteractive - fetchStart,
+                    domReadyTime: domComplete - domContentLoadedEventEnd,
+                    loadTime: loadEventEnd - fetchStart, // 页面完全加载时间
+                };
+                Timing.storage.setItem(data);
+                tracker.send(data);
+            }, 500);
+        });
+    };
+    Timing.storage = Storage.getInstance();
+    return Timing;
+}());
+
 var GMonitor = /** @class */ (function () {
     function GMonitor() {
         this.init();
@@ -369,6 +399,7 @@ var GMonitor = /** @class */ (function () {
             new JSError();
             new XHR();
             new Blank();
+            new Timing();
         }
         catch (error) {
             console.error('GMonitor initialization failed:', error);
