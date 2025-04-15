@@ -497,6 +497,46 @@ var LongTask = /** @class */ (function () {
     return LongTask;
 }());
 
+var PV = /** @class */ (function () {
+    function PV() {
+        this.storage = Storage.getInstance();
+        this.init();
+    }
+    PV.prototype.getPv = function () {
+        var navigator = window.navigator;
+        var connection = navigator.connection;
+        var data = {
+            kind: 'business',
+            type: 'pv',
+            connectionType: connection.effectiveType,
+            downlink: connection.downlink,
+            rtt: connection.rtt,
+            screen: "".concat(window.screen.width, "x").concat(window.screen.height),
+        };
+        this.storage.setItem(data);
+        tracker.send(data);
+    };
+    PV.prototype.getStayTime = function () {
+        var _this = this;
+        var startTime = Date.now();
+        window.addEventListener('unload', function () {
+            var stayTime = Date.now() - startTime;
+            var data = {
+                kind: 'business',
+                type: 'stayTime',
+                stayTime: stayTime,
+            };
+            _this.storage.setItem(data);
+            tracker.send(data);
+        }, false);
+    };
+    PV.prototype.init = function () {
+        this.getPv();
+        this.getStayTime();
+    };
+    return PV;
+}());
+
 var GMonitor = /** @class */ (function () {
     function GMonitor() {
         this.init();
@@ -508,6 +548,7 @@ var GMonitor = /** @class */ (function () {
             new Blank();
             new Timing();
             new LongTask();
+            new PV();
         }
         catch (error) {
             console.error('GMonitor initialization failed:', error);
