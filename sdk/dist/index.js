@@ -466,6 +466,37 @@ var Timing = /** @class */ (function () {
     return Timing;
 }());
 
+var LongTask = /** @class */ (function () {
+    function LongTask() {
+        this.init();
+    }
+    LongTask.prototype.init = function () {
+        // 监听长任务
+        new PerformanceObserver(function (entryList, observer) {
+            entryList.getEntries().forEach(function (entry) {
+                if (entry.duration > 100) {
+                    var lastEvent_1 = getLastEvent();
+                    requestIdleCallback(function () {
+                        var data = {
+                            kind: 'experience',
+                            type: 'longTask',
+                            eventType: lastEvent_1 === null || lastEvent_1 === void 0 ? void 0 : lastEvent_1.type,
+                            startTime: entry === null || entry === void 0 ? void 0 : entry.startTime,
+                            duration: entry === null || entry === void 0 ? void 0 : entry.duration,
+                            selector: lastEvent_1 ? getSelector$2(lastEvent_1) : ''
+                        };
+                        LongTask.storage.setItem(data);
+                        tracker.send(data);
+                    });
+                }
+            });
+            observer.disconnect();
+        }).observe({ entryTypes: ['longtask'] });
+    };
+    LongTask.storage = Storage.getInstance();
+    return LongTask;
+}());
+
 var GMonitor = /** @class */ (function () {
     function GMonitor() {
         this.init();
@@ -476,6 +507,7 @@ var GMonitor = /** @class */ (function () {
             new XHR();
             new Blank();
             new Timing();
+            new LongTask();
         }
         catch (error) {
             console.error('GMonitor initialization failed:', error);

@@ -170,6 +170,7 @@ function App() {
               }
               style={{ marginTop: 16 }}
             >
+              {/* <div id="terminal" elementtiming="meaningful" style={{ height: '400px', overflowY: 'auto' }}> */}
               <div id="terminal" style={{ height: '400px', overflowY: 'auto' }}>
                 <List
                   dataSource={logs}
@@ -189,7 +190,7 @@ function App() {
                           item.type === 'blank' ? 'purple' : 
                           item.type === 'timing' ? 'pink' : 'cyan'
                         }>
-                          {item.timestamp || item.duration || item.emptyPoints || item.loadTime}
+                          {item.type}
                         </Tag>
                         <Text style={{ color: token.colorText }}>{
                           item.message 
@@ -197,6 +198,7 @@ function App() {
                           || (item.loadTime ? `页面完全加载时间 ${item.loadTime} ms` : null)
                           || (item.inputDelay ? `FID时间 ${item.inputDelay} ms` : null)
                           || (item.FCP ? `FCP时间 ${item.FCP} ms` : null)
+                          || (item.duration ? `Duration ${item.duration} ms` : null)
                           || `screen:${item.screen},viewPoint: ${item.viewPoint}`
                         }</Text>
                       </Space>
