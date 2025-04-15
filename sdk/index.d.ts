@@ -5,3 +5,7 @@ declare module '@aliyun-sls/web-track-browser' {
   }
   export = SlsTracker;
 }
+
+declare global {}
+
+export {}

@@ -51,7 +51,7 @@ class Timing {
     // L	(onLoad)	当依赖的资源全部加载完毕之后才会触发
     // TTI	(Time to Interactive) 可交互时间	用于标记应用已进行视觉渲染并能可靠响应用户输入的时间点
     // FID	First Input Delay(首次输入延迟)	用户首次和页面交互(单击链接，点击按钮等)到页面响应交互的时间
-    let FP: PerformanceEntry, FCP: PerformanceEntry, FMP: PerformanceEntry, LCP: LargestContentfulPaint;
+    let FP: PerformanceEntry, FCP: PerformanceEntry, FMP: PerformanceEntry, LCP: any;
     new PerformanceObserver((entryList) => {
       const entries = entryList.getEntries();
       entries.forEach(entry => {
@@ -73,7 +73,7 @@ class Timing {
     new PerformanceObserver((entryList, observer) => {
       const perfEntries = entryList.getEntries();
       const lastEntry = perfEntries[perfEntries.length - 1];
-      LCP = lastEntry as LargestContentfulPaint;
+      LCP = lastEntry as any;
       observer.disconnect();
     }).observe({ entryTypes: ['largest-contentful-paint']});
 
